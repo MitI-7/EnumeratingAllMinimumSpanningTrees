@@ -71,7 +71,7 @@ public:
 
     // count number of minimum spanning trees(O(n^3))
     long long count() {
-        std::vector<std::vector<double>> matrix(this->N - 1, std::vector<double>(this->N - 1, 0));
+        std::vector<std::vector<long long>> matrix(this->N - 1, std::vector<long long>(this->N - 1, 0));
         for (const auto &edge : this->edges) {
             int i = edge.node1;
             int j = edge.node2;
@@ -85,8 +85,7 @@ public:
             matrix[i][i] += this->graph[i].size();
         }
 
-        auto res = this->determinant(matrix);
-        return (long long)(res + EPS);
+        return this->determinant(matrix);
     }
 
     // construct O(n + e + k)
@@ -225,37 +224,48 @@ private:
     }
 
     // O(n^3)
-    double determinant(std::vector<std::vector<double>> &matrix){
-        const int n = matrix.size();
-        std::vector<int> ri(n);
-        std::iota(ri.begin(), ri.end(), 0);
-
-        double det = 1.0;
-        for (int p = 1 ; p <= n - 1; p++) {
-            for (int i = p + 1 ; i <= n; i++) {
-                if (std::abs(matrix[ri[i - 1]][p - 1]) > std::abs(matrix[ri[p - 1]][p - 1])) {
-                    int t = ri[p - 1];
-                    ri[p - 1] = ri[i - 1];
-                    ri[i - 1] = t;
-                    det = -det;
-                }
-            }
-            if (matrix[ri[p - 1]][p - 1] == 0) {
-                return false;
-            }
-
-            det = det * matrix[ri[p - 1]][p - 1];
-
-            for (int i = p + 1 ; i <= n; i++) {
-                matrix[ri[i - 1]][p - 1] /= matrix[ri[p - 1]][p - 1];
-
-                for (int j = p + 1 ; j <= n; j++) {
-                    matrix[ri[i - 1]][j - 1] -= matrix[ri[i - 1]][p - 1] * matrix[ri[p - 1]][j - 1];
-                }
-            }
+    long long determinant(std::vector<std::vector<long long>> matrix) {
+        if (matrix.size() != matrix[0].size()) {
+            return 0;
         }
 
-        det = det * matrix[ri[n - 1]][n - 1];
-        return det;
+        const long long n = matrix.size();
+
+        long long k = 0;
+        long long c = 1;
+        long long s = 1;
+
+        while (k < n - 1) {
+            int p = matrix[k][k];
+            if (p == 0) {
+                auto i = k;
+                while (i < n && matrix[i][k] == 0) {
+                    ++i;
+                }
+                if (i >= n) {
+                    return 0;
+                }
+
+                for (int j = k; j < n; ++j) {
+                    const auto tmp = matrix[i][j];
+                    matrix[i][j] = matrix[k][j];
+                    matrix[k][j] = tmp;
+                }
+
+                s *= -1;
+                p = matrix[k][k];
+            }
+
+            for (int i = k + 1; i < n; ++i) {
+                for (int j = k + 1; j < n; ++j) {
+                    const auto t = p * matrix[i][j] - matrix[i][k] * matrix[k][j];
+                    matrix[i][j] = t / c;
+                }
+            }
+            c = p;
+            k++;
+        }
+
+        return s * matrix[n - 1][n - 1];
     }
 };
