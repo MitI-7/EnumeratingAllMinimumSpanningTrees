@@ -13,6 +13,7 @@ public:
     std::unordered_map<int, std::vector<int>> candi;
     std::set<int> leave;
     std::vector<std::pair<int, int>> operation;
+    std::vector<bool> is_st;
 
 public:
     AllSpanningTrees() = default;
@@ -65,20 +66,24 @@ public:
     }
 
     // O(eklogk)
-    std::set<std::vector<int>> generate_all_spanning_trees() {
-        std::set<std::vector<int>> spanning_trees;
+    std::vector<std::vector<int>> generate_all_spanning_trees() {
+        assert(this->operation.size() == this->is_st.size());
+        std::vector<std::vector<int>> spanning_trees;
 
         std::vector<int> tree(this->edges.size());
         // insert T0
         for (int edge_idx = 0; edge_idx < this->N - 1; ++edge_idx) {
             tree[edge_idx] = 1;
         }
-        spanning_trees.insert(tree);
+        spanning_trees.emplace_back(tree);
 
-        for (const auto &p : this->operation) {
+        for (int i = 0; i < this->operation.size(); ++i) {
+            const auto &p = this->operation[i];
             tree[p.first] = 0;
             tree[p.second] = 1;
-            spanning_trees.insert(tree);
+            if (this->is_st[i]) {
+                spanning_trees.emplace_back(tree);
+            }
         }
 
         return spanning_trees;
@@ -213,11 +218,13 @@ private:
             const auto g = this->candi[e_k].back(); this->candi[e_k].pop_back();
             que.push_front(g);
 
-            this->operation.emplace_back(std::make_pair(e_k, g));
+            this->operation.emplace_back(std::make_pair(e_k, g));   // spanning tree
+            this->is_st.emplace_back(true);
 
             sub_child(e_k, g);
 
             this->operation.emplace_back(std::make_pair(g, e_k));
+            this->is_st.emplace_back(false);
         }
 
         // keep order of candi[e_k]

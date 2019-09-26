@@ -71,7 +71,7 @@ void sample() {
         return;
     }
 
-    set<vector<int>> ans = amst.generate_all_minimum_spanning_trees();
+    vector<vector<int>> ans = amst.generate_all_minimum_spanning_trees();
     cout << "#minimum spanning tree: " << ans.size() << endl;
     cout << "minimum cost: " << amst.minimum_cost << endl;
 

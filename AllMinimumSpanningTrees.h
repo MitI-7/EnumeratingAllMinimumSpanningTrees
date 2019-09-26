@@ -91,14 +91,14 @@ public:
 
     // construct O(n + e + k)
     // output O(eklogk)
-    std::set<std::vector<int>> generate_all_minimum_spanning_trees() {
+    std::vector<std::vector<int>> generate_all_minimum_spanning_trees() {
         ast.set_graph(this->graph);
         ast.set_edges(this->edges);
 
         bool ok = ast.build();
         if (not ok) {
             std::cerr << "can't make spanning tree" << std::endl;
-            return std::set<std::vector<int>>();
+            return std::vector<std::vector<int>>();
         }
 
         return this->ast.generate_all_spanning_trees();
